@@ -50,9 +50,12 @@ def split_image(image, h_size, v_size):
 
 # Usage
 if __name__ == "__main__":
-    image = cv2.imread("images/omr-normal.jpeg")
-    # _, bottom = split_image_percent(image, 0.44)
-    # up, _ = split_image_percent(bottom, 0.953)
+    image = cv2.imread("images/omr-filled.jpg")
+    _, bottom = split_image_percent(image, 0.44518)
+    up, _ = split_image_percent(bottom, 0.94698)
+    cv2.imshow("", up)
+    cv2.waitKey()
+    
     # _, right = split_image_percent_v(up, 0.95)
     # left, _ = split_image_percent_v(right, 0.07)
     # cv2.imwrite(f"left.jpg", left)
