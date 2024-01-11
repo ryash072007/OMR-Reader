@@ -51,14 +51,35 @@ print(points)
 x = [x[0] for x in points]
 y = [y[1] for y in points]
 
+# target_image = target_image[min(y) + template.shape[1] + 3: max(y), min(x): max(x)]
 
 pts1 = np.float32([(54, 312), (508, 312), (56, 724), (506, 724)])
 pts2 = np.float32([[0, 0], [600, 0], [0, 800], [600, 800]])
 
 matrix = cv2.getPerspectiveTransform(pts1, pts2)
 result = cv2.warpPerspective(target_image, matrix, (600, 800))
-result = result[template.shape[1] * 2:, :]
-cv2.imwrite("images/test.png", result)
+result = result[template.shape[1] * 2 + 3:, :]
+# cv2.imwrite("images/test.png", result)
+
+def split_image_times(image, h_times, v_times):
+    # Calculate the split dimensions
+    h_size = int(image.shape[0] / h_times)
+    v_size = int(image.shape[1] / v_times)
+
+    # Split the image
+    images = []
+    for i in range(0, image.shape[0], h_size):
+        for j in range(0, image.shape[1], v_size):
+            images.append(image[i : i + h_size, j : j + v_size])
+
+    return images
+
+images = split_image_times(result, 1, 4)
+
+for i, img in enumerate(images):
+    new_set = split_image_times(img, 25, 1)
+    for x, img_new_set in enumerate(new_set):
+        cv2.imwrite(f"split/split{i}-{x}.png", img_new_set)
 
 # Display the result
 cv2.imshow('Result', result)
