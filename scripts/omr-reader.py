@@ -111,9 +111,12 @@ def read_omr(image_path):
     # cv2.imwrite("split/omr_part_3.jpg", part_3)
 
     part_1_images = split_image_times(part_1, 4, 1)
+    index = 1
     for a in range(1):
         for b in range(1):
             block = part_1_images[a][b]
+            cv2.imshow("", block)
+            cv2.waitKey()
             columns = split_image_times(block, 1, 4)
             columns = columns[0]
             # print(columns)
@@ -138,6 +141,7 @@ def read_omr(image_path):
                     if 10000 > new_image.size > 1089:
                         inner_data.append(new_image)
                 data.append(inner_data)
+            print(len(data))
             # data = list(reversed(data))
             #####
             final = [[],[],[],[],[]]
@@ -147,9 +151,12 @@ def read_omr(image_path):
                 final[i].append(data[2][i])
                 final[i].append(data[3][i])
             
+            final = list(reversed(final))
+            
             for i, img_list in enumerate(final):
                 for j, img in enumerate(img_list):
-                    cv2.imwrite(f"split/omr_{i}_{j}.jpg", img)
+                    cv2.imwrite(f"split/omr_{index}_{j + 1}.jpg", img)
+                index += 1
             #######
             # data = [sorted_data_1, sorted_data_2, sorted_data_3, sorted_data_4, sorted_data_5]            
             
