@@ -106,69 +106,8 @@ def read_omr(image_path):
     part_2 = get_image_part(omr_area_contours_reversed[4], omr_area)
     part_3 = get_image_part(omr_area_contours_reversed[6], omr_area)
 
-    # cv2.imwrite("split/omr_part_1.jpg", part_1)
-    # cv2.imwrite("split/omr_part_2.jpg", part_2)
-    # cv2.imwrite("split/omr_part_3.jpg", part_3)
-
-    part_1_images = split_image_times(part_1, 4, 1)
-    index = 1
-    for a in range(1):
-        for b in range(1):
-            block = part_1_images[a][b]
-            cv2.imshow("", block)
-            cv2.waitKey()
-            columns = split_image_times(block, 1, 4)
-            columns = columns[0]
-            # print(columns)
-            
-            proper_images = []
-            for i, img in enumerate(columns):
-                if img.size > 1500:
-                    # cv2.imwrite(f"split/omr_column_block_{i}.jpg", img)
-                    proper_images.append(img)
-
-            data = []
-            for k, _image in enumerate(proper_images):
-                
-                contours, _ = cv2.findContours(
-                    _image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE
-                )
-                inner_data = []
-                i = 0
-                for j, contour in enumerate(contours):
-                    x, y, w, h = cv2.boundingRect(contour)
-                    new_image = _image[y : y + h, x : x + w]
-                    if 10000 > new_image.size > 1089:
-                        inner_data.append(new_image)
-                data.append(inner_data)
-            print(len(data))
-            # data = list(reversed(data))
-            #####
-            final = [[],[],[],[],[]]
-            for i in range(5):
-                final[i].append(data[0][i])
-                final[i].append(data[1][i])
-                final[i].append(data[2][i])
-                final[i].append(data[3][i])
-            
-            final = list(reversed(final))
-            
-            for i, img_list in enumerate(final):
-                for j, img in enumerate(img_list):
-                    cv2.imwrite(f"split/omr_{index}_{j + 1}.jpg", img)
-                index += 1
-            #######
-            # data = [sorted_data_1, sorted_data_2, sorted_data_3, sorted_data_4, sorted_data_5]            
-            
-            # for i, imga in enumerate(data):
-            #     for j, img in enumerate(imga):
-            #         cv2.imwrite(f"split/omr_{i}_{j}.jpg", img)
-            
-            
-                    
-
-    # Now contour_image contains the first contour and all its child contours
-    # cv2.imwrite(f"split/omr_area_area.jpg", image)
+    
+           
 
     
     cv2.destroyAllWindows()
@@ -177,4 +116,3 @@ def read_omr(image_path):
 # Usage example
 image_path = "images/omr_sheet - filled.jpg"
 read_omr(image_path)
-    
