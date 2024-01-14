@@ -130,9 +130,9 @@ def read_omr(image_path):
             columns = split_image_times(block, 1, 4)
             columns = columns[0]    
             print(len(columns))
-            for i in columns:
-                cv2.imshow("", i)
-                cv2.waitKey()
+            # for i in columns:
+            #     cv2.imshow("", i)
+            #     cv2.waitKey()
             # print(columns)
 
             proper_images = []
@@ -152,6 +152,8 @@ def read_omr(image_path):
                     x, y, w, h = cv2.boundingRect(contour)
                     new_image = _image[y : y + h, x : x + w]
                     if 10000 > new_image.size > 1089:
+                        cv2.imshow("", new_image)
+                        cv2.waitKey()
                         inner_data.append(new_image)
                 data.append(inner_data)
             print(len(data))
