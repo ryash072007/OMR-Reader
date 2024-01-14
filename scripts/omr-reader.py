@@ -57,10 +57,13 @@ def split_image_times(image, h_times, v_times):
 
     # Split the image
     images = []
-    for i in range(0, image.shape[0], h_size):
+    for i in range(h_times):
         row = []
-        for j in range(0, image.shape[1], v_size):
-            row.append(image[i : i + h_size, j : j + v_size])
+        for j in range(v_times):
+            # Adjust the last slice to include any remaining pixels
+            h_end = image.shape[0] if i == h_times - 1 else (i + 1) * h_size
+            v_end = image.shape[1] if j == v_times - 1 else (j + 1) * v_size
+            row.append(image[i * h_size : h_end, j * v_size : v_end])
         images.append(row)
 
     return images
