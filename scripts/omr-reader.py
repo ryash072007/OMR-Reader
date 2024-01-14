@@ -177,3 +177,4 @@ def read_omr(image_path):
 # Usage example
 image_path = "images/omr_sheet - filled.jpg"
 read_omr(image_path)
+    
