@@ -58,7 +58,7 @@ def get_index_with_highest_white(image_list):
         white_pixels = np.sum(img == 255)
         # print(white_pixels)
         # If this image has more white pixels than the current maximum, update the index and max_white_pixels
-        if white_pixels > 700 and white_pixels > max_white_pixels:
+        if white_pixels > 2 * max_white_pixels and white_pixels > 400:
             index = i
             max_white_pixels = white_pixels
 
@@ -244,9 +244,16 @@ def read_omr(image_path):
             for lst in image_list:
                 highest_index = get_index_with_highest_white(lst)
                 answers[len(answers) + 1] = highest_index
+                # if len(answers) + 1 == 21:
+                #     print(np.sum(lst[0] == 255))
+                #     print(np.sum(lst[1] == 255))
+                #     print(np.sum(lst[2] == 255))
+                #     print(np.sum(lst[3] == 255))
+                #     cv2.imshow("", lst[0])
+                #     cv2.waitKey()
     cv2.destroyAllWindows()
     print(answers)
 
 # Usage example
-image_path = "images/omr_sheet - filled.jpg"
+image_path = "images/omr_sheet - filled - more.jpg"
 read_omr(image_path)
