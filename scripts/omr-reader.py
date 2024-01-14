@@ -50,6 +50,32 @@ def get_omr_area(thresholded, contours):
     return omr_area
 
 
+def get_index_with_highest_white(image_list):
+    index = -1
+    max_white_pixels = 0
+    for i, img in enumerate(image_list):
+        # Count the number of white pixels in the image
+        white_pixels = np.sum(img == 255)
+        # print(white_pixels)
+        # If this image has more white pixels than the current maximum, update the index and max_white_pixels
+        if white_pixels > 700 and white_pixels > max_white_pixels:
+            index = i
+            max_white_pixels = white_pixels
+
+    match index:
+        case 0:
+            index = 'A'
+        case 1:
+            index = 'B'
+        case 2:
+            index = 'C'
+        case 3:
+            index = 'D'
+        case _:
+            index = 'None Selected'
+    
+    return index
+
 def split_image_times(image, h_times, v_times):
     # Calculate the split dimensions
     h_size = int(image.shape[0] / h_times)
@@ -69,7 +95,67 @@ def split_image_times(image, h_times, v_times):
     return images
 
 
+def split_image_times_list(image, h_times, v_times):
+    # Calculate the split dimensions
+    h_size = int(image.shape[0] / h_times)
+    v_size = int(image.shape[1] / v_times)
 
+    # Split the image
+    images = []
+    for i in range(h_times):
+        for j in range(v_times):
+            # Adjust the last slice to include any remaining pixels
+            h_end = image.shape[0] if i == h_times - 1 else (i + 1) * h_size
+            v_end = image.shape[1] if j == v_times - 1 else (j + 1) * v_size
+            images.append(image[i * h_size : h_end, j * v_size : v_end])
+
+    return images
+
+
+def remove_top_areas(image):
+    for y in range(image.shape[1]):
+        if np.any(image[y] == 255):
+            break
+    return image[y:]
+
+
+def remove_bottom_areas(image):
+    for y in range(-1, -image.shape[1] - 1, -1):
+        if np.any(image[y] == 255):
+            break
+    return image[:y]
+
+
+def remove_left_areas(image):
+    # Iterate over each column from left to right
+    for x in range(image.shape[0]):
+        # If any pixel in this column is white, break the loop
+        if np.any(image[:, x] == 255):
+            break
+
+    # Return the image from the first white pixel column to the right
+    return image[:, x:]
+
+
+def remove_right_areas(image):
+    # Iterate over each column from left to right
+    for x in range(-1, -image.shape[0] - 1, -1):
+        # If any pixel in this column is white, break the loop
+        if np.any(image[:, x] == 255):
+            break
+
+    # Return the image from the first white pixel column to the right
+    return image[:, :x]
+
+
+def remove_excess_areas(image):
+    top_removed = remove_top_areas(image)
+    bottom_removed = remove_bottom_areas(top_removed)
+    left_removed = remove_left_areas(bottom_removed)
+    right_removed = remove_right_areas(left_removed)
+    return right_removed
+    # cv2.imshow("", right_removed)
+    # cv2.waitKey()
 
 
 def get_areas_in_omr(omr_area, contours):
@@ -117,19 +203,24 @@ def read_omr(image_path):
     # cv2.imwrite("split/omr_part_3.jpg", part_3)
 
     part_1_images = split_image_times(part_1, 4, 1)
+    part_2_images = split_image_times(part_2, 4, 1)
+    part_3_images = split_image_times(part_3, 4, 1)
+    
+    images = [part_1_images, part_2_images, part_3_images]
     index = 1
-    for a in range(2):
-        for b in range(1):
-            block = part_1_images[a][b]
+    answers = {}
+    for a in range(3):
+        for b in range(4):
+            block = images[a][b][0]
             block = block[
                 int(0.05 * block.shape[1]) : int(0.95 * block.shape[1]),
-                int(0.01 * block.shape[0]) : -int(0.01 * block.shape[0])
+                int(0.01 * block.shape[0]) : -int(0.01 * block.shape[0]),
             ]
-            cv2.imshow("", block)
-            cv2.waitKey()
+            # cv2.imshow("", block)
+            # cv2.waitKey()
             columns = split_image_times(block, 1, 4)
-            columns = columns[0]    
-            print(len(columns))
+            columns = columns[0]
+            # print(len(columns))
             # for i in columns:
             #     cv2.imshow("", i)
             #     cv2.waitKey()
@@ -138,14 +229,23 @@ def read_omr(image_path):
             proper_images = []
             for i, img in enumerate(columns):
                 if img.size > 1500:
-                    # cv2.imwrite(f"split/omr_column_block_{i}.jpg", img)
-                    cv2.imshow("", img)
-                    cv2.waitKey()
-                    proper_images.append(img)
+                    processed = remove_excess_areas(img)
+                    proper_images.append(processed)
             
+            image_list = [[],[],[],[],[]]
+            
+            for img in proper_images:
+                split_images = split_image_times_list(img, 5, 1)
+                for i, split_img in enumerate(split_images):
+                    image_list[i].append(split_img)
+                    # cv2.imwrite(f"split/split_{index}_{i}.jpg", split_img)
+                index += 1
 
+            for lst in image_list:
+                highest_index = get_index_with_highest_white(lst)
+                answers[len(answers) + 1] = highest_index
     cv2.destroyAllWindows()
-
+    print(answers)
 
 # Usage example
 image_path = "images/omr_sheet - filled.jpg"
