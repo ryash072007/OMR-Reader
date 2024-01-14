@@ -139,23 +139,9 @@ def read_omr(image_path):
             for i, img in enumerate(columns):
                 if img.size > 1500:
                     # cv2.imwrite(f"split/omr_column_block_{i}.jpg", img)
+                    cv2.imshow("", img)
+                    cv2.waitKey()
                     proper_images.append(img)
-
-            data = []
-            for k, _image in enumerate(proper_images):
-                contours, _ = cv2.findContours(
-                    _image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE
-                )
-                inner_data = []
-                i = 0
-                for j, contour in enumerate(contours):
-                    x, y, w, h = cv2.boundingRect(contour)
-                    new_image = _image[y : y + h, x : x + w]
-                    if 10000 > new_image.size > 1089:
-                        cv2.imshow("", new_image)
-                        cv2.waitKey()
-                        inner_data.append(new_image)
-                data.append(inner_data)
             
 
     cv2.destroyAllWindows()
