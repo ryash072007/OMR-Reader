@@ -35,7 +35,15 @@ if detected_circles is not None:
     circles.sort(reverse=True)
     circles = circles[:4]
     
+    ordered_circles = [i[1] for i in circles]
     
+    center = np.mean(ordered_circles, axis=0)
+
+    # Sort the points by the angle they make with the center
+    ordered_circles.sort(key=lambda point: np.arctan2(point[1] - center[1], point[0] - center[0]))
+
+    # Reverse the list because the points are sorted in counterclockwise order
+    # ordered_circles = ordered_circles[::-1]
 
     # # Draw the circumference of the circle.
     # cv2.circle(img, (a, b), r, (0, 100, 0), 2)
@@ -45,4 +53,20 @@ if detected_circles is not None:
     # # cv2.imshow("Detected Circle", img)
     # # cv2.waitKey(0)
 
-    cv2.imwrite("split/circled.jpg", img)
+
+    # Define the four corners of the region of interest (ROI)
+    roi_corners = np.array([(x, y) for (x, y) in ordered_circles], dtype=np.float32)
+
+    height, width = img.shape[0], img.shape[1]
+    # height, width = img.shape[0], img.shape[1]
+
+    # Define the destination points for the perspective transform
+    dst_corners = np.array([(0, 0), (width, 0), (width, height), (0, height)], dtype=np.float32)
+
+    # Compute the perspective transform matrix
+    M = cv2.getPerspectiveTransform(roi_corners, dst_corners)
+
+    # Apply the perspective transform to the image
+    warped_img = cv2.warpPerspective(img, M, (width, height))
+
+    cv2.imwrite("split/warped_img.jpg", warped_img)
