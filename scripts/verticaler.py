@@ -1,29 +1,48 @@
-import numpy as np
 import cv2
+import numpy as np
 
-omr_image = cv2.imread("images/omr_sheet -filled and circles.png")
-circle_image = cv2.imread("images/circle_pointer.jpg", 0)
+# Read image.
+img = cv2.imread("images/omr_sheet -filled and circles.png", cv2.IMREAD_COLOR)
 
-gray_omr_image = cv2.cvtColor(omr_image, cv2.COLOR_BGR2GRAY)
-blurred_omr_image = cv2.GaussianBlur(gray_omr_image, (5, 5), 0)
+# Convert to grayscale.
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+# Blur using 3 * 3 kernel.
+gray_blurred = cv2.blur(gray, (3, 3))
 
-matched_result = cv2.matchTemplate(
-    blurred_omr_image, circle_image, cv2.TM_CCOEFF
+# Apply Hough transform on the blurred image.
+detected_circles = cv2.HoughCircles(
+    gray_blurred,
+    cv2.HOUGH_GRADIENT,
+    1,
+    20,
+    param1=50,
+    param2=30,
+    minRadius=1,
+    maxRadius=40,
 )
-locations = np.where(matched_result >= 0.9)
 
-for pt in zip(*locations[::-1]):  # Swap columns and rows
-    if pt[0] + circle_image.shape[1] > 1000 and pt[1] + circle_image.shape[0] > 1000:
-        cv2.rectangle(
-            omr_image,
-            pt,
-            (pt[0] + circle_image.shape[1], pt[1] + circle_image.shape[0]),
-            (0, 0, 255),
-            2,
-        )
+# Draw circles that are detected.
+if detected_circles is not None:
+    # Convert the circle parameters a, b and r to integers.
+    detected_circles = np.uint16(np.around(detected_circles))
+    circles = []
+    for pt in detected_circles[0, :]:
+        a, b, r = pt[0], pt[1], pt[2]
 
+        circles.append((r, (a, b)))
 
-cv2.imwrite('split/matched_result.png', omr_image)
-cv2.waitKey()
-cv2.destroyAllWindows()
+    circles.sort(reverse=True)
+    circles = circles[:4]
+    
+    
+
+    # # Draw the circumference of the circle.
+    # cv2.circle(img, (a, b), r, (0, 100, 0), 2)
+
+    # # Draw a small circle (of radius 1) to show the center.
+    # cv2.circle(img, (a, b), 1, (0, 0, 100), 3)
+    # # cv2.imshow("Detected Circle", img)
+    # # cv2.waitKey(0)
+
+    cv2.imwrite("split/circled.jpg", img)
