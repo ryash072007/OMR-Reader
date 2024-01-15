@@ -25,8 +25,8 @@ def filter_tuples(points, max_distance=5):
     return final_result
 
 # Load target image and template
-target_image = cv2.imread('images/omr_sheet.png')
-template = cv2.imread('images/circle.png')
+target_image = cv2.imread('images/omr_sheet -filled and circles.png')
+template = cv2.imread('images/circle_pointer.png')
 
 # Convert to grayscale
 target_gray = cv2.cvtColor(target_image, cv2.COLOR_BGR2GRAY)
@@ -41,7 +41,7 @@ loc = np.where(res >= threshold)
 
 # Draw rectangles around matches
 points = list(zip(*loc[::-1]))
-points = filter_tuples(points, 5)
+# points = filter_tuples(points, 5)
 
 for pt in points:
     cv2.rectangle(target_image, pt, (pt[0] + template.shape[1], pt[1] + template.shape[0]), (0, 100, 0), 2)
@@ -53,12 +53,12 @@ y = [y[1] for y in points]
 
 # target_image = target_image[min(y) + template.shape[1] + 3: max(y), min(x): max(x)]
 
-pts1 = np.float32([(54, 312), (508, 312), (56, 724), (506, 724)])
+pts1 = np.array(x)
 pts2 = np.float32([[0, 0], [600, 0], [0, 800], [600, 800]])
 
 matrix = cv2.getPerspectiveTransform(pts1, pts2)
 result = cv2.warpPerspective(target_image, matrix, (600, 800))
-result = result[template.shape[1] * 2 + 3:, :]
+# result = result[template.shape[1] * 2 + 3:, :]
 # cv2.imwrite("images/test.png", result)
 
 def split_image_times(image, h_times, v_times):
@@ -74,12 +74,12 @@ def split_image_times(image, h_times, v_times):
 
     return images
 
-images = split_image_times(result, 1, 4)
+# images = split_image_times(result, 1, 4)
 
-for i, img in enumerate(images):
-    new_set = split_image_times(img, 25, 1)
-    for x, img_new_set in enumerate(new_set):
-        cv2.imwrite(f"split/split{i}-{x}.png", img_new_set)
+# for i, img in enumerate(images):
+#     new_set = split_image_times(img, 25, 1)
+#     for x, img_new_set in enumerate(new_set):
+#         cv2.imwrite(f"split/split{i}-{x}.png", img_new_set)
 
 # Display the result
 cv2.imshow('Result', result)
