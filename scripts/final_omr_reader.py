@@ -199,6 +199,13 @@ def read_omr(image_path):
             a, b, r = pt[0], pt[1], pt[2]
 
             circles.append((r, (a, b)))
+            # cv2.circle(img, (a, b), r, (0, 100, 0), 2)
+
+            # Draw a small circle (of radius 1) to show the center.
+            cv2.circle(image, (a, b), r, (0, 0, 100), 6)
+            cv2.imwrite('split/image.png', image)       
+            # cv2.imshow("Detected Circle", image)
+            # cv2.waitKey(0)
 
         circles.sort(reverse=True)
         circles = circles[:4]
