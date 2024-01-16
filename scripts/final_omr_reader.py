@@ -53,12 +53,13 @@ def get_omr_area(thresholded, contours):
 def get_index_with_highest_white(image_list):
     index = -1
     max_white_pixels = 0
+    min_white_pixels = image_list[0].size // 3    
     for i, img in enumerate(image_list):
         # Count the number of white pixels in the image
         white_pixels = np.sum(img == 255)
         # print(white_pixels)
         # If this image has more white pixels than the current maximum, update the index and max_white_pixels
-        if white_pixels > 2 * max_white_pixels and white_pixels > 400:
+        if white_pixels > 2 * max_white_pixels and white_pixels > min_white_pixels:
             index = i
             max_white_pixels = white_pixels
 
@@ -224,7 +225,9 @@ def read_omr(image_path):
         # Define the four corners of the region of interest (ROI)
         roi_corners = np.array([(x, y) for (x, y) in ordered_circles], dtype=np.float32)
 
-        height, width = gray.shape[0], gray.shape[1]
+        # height, width = gray.shape[0], gray.shape[1]
+        height = 3300
+        width = 2475
         # height, width = img.shape[0], img.shape[1]
 
         # Define the destination points for the perspective transform
@@ -256,6 +259,13 @@ def read_omr(image_path):
         omr_area, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE
     )
 
+    for i, contour in enumerate(omr_area_contours):
+    # Get the image for the contour 
+        part = get_image_part(contour, omr_area)
+        
+        # Save the image
+        cv2.imwrite(f"split/omr_part_{i}.jpg", part)
+    
     # Get the contour image for the first contour and its children
     omr_area_contours_reversed = list(reversed(omr_area_contours))
     part_1 = get_image_part(omr_area_contours_reversed[2], omr_area)
@@ -319,5 +329,5 @@ def read_omr(image_path):
     print(answers)
 
 # Usage example
-image_path = "images/omr_sheet -filled and circles.png"
+image_path = "images/test (1).jpg"
 read_omr(image_path)
