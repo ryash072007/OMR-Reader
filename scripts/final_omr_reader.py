@@ -168,39 +168,6 @@ def get_areas_in_omr(omr_area, contours):
     return images
 
 
-def get_points(sharpened_image):
-    _, thresholded = cv2.threshold(sharpened_image, 127, 255, cv2.THRESH_BINARY)
-
-    # Find contours in the thresholded image
-    contours, _ = cv2.findContours(thresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    image_parts = list()
-    largest_area = 0
-    # Iterate over all contours
-    for i, contour in enumerate(contours):
-        # Get the image for the contour
-        x, y, w, h = cv2.boundingRect(np.array(contour))
-        if w * h > 8000:
-            image_parts.append((x, y, w, h))
-            if w * h > largest_area:
-                largest_area = w * h
-
-
-    circles_points = []
-
-    for x, y, w, h in image_parts:
-        image_part = sharpened_image[y : y + h, x : x + w]
-        image_area = w * h
-        circle_area = 3.14 * (min(w, h) / 2) ** 2
-        filled_pixels = np.sum(image_part == 0)
-        _range = range(int(0.95 * circle_area), int(1.05 * circle_area))
-        # print(circle_area, filled_pixels)
-        if filled_pixels in _range:
-            circles_points.append((x, y, w, h))
-    
-    return circles_points
-
-
 def read_omr(image_path):
     # Load the image
     image = cv2.imread(image_path)
@@ -250,18 +217,6 @@ def read_omr(image_path):
         # Sort the points by the angle they make with the center
         ordered_circles.sort(key=lambda point: np.arctan2(point[1] - center[1], point[0] - center[0]))
 
-        # Reverse the list because the points are sorted in counterclockwise order
-        # ordered_circles = ordered_circles[::-1]
-
-        # # Draw the circumference of the circle.
-        # cv2.circle(img, (a, b), r, (0, 100, 0), 2)
-
-        # # Draw a small circle (of radius 1) to show the center.
-        # cv2.circle(img, (a, b), 1, (0, 0, 100), 3)
-        # # cv2.imshow("Detected Circle", img)
-        # # cv2.waitKey(0)
-
-
         # Define the four corners of the region of interest (ROI)
         roi_corners = np.array([(x, y) for (x, y) in ordered_circles], dtype=np.float32)
 
@@ -299,12 +254,12 @@ def read_omr(image_path):
         omr_area, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE
     )
 
-    # for i, contour in enumerate(omr_area_contours):
-    # # Get the image for the contour 
-    #     part = get_image_part(contour, omr_area)
+    for i, contour in enumerate(omr_area_contours):
+    # Get the image for the contour 
+        part = get_image_part(contour, omr_area)
         
-    #     # Save the image
-    #     cv2.imwrite(f"split/omr_part_{i}.jpg", part)
+        # Save the image
+        cv2.imwrite(f"split/omr_part_{i}.jpg", part)
     
     # Get the contour image for the first contour and its children
     omr_area_contours_reversed = list(reversed(omr_area_contours))
@@ -312,9 +267,6 @@ def read_omr(image_path):
     part_2 = get_image_part(omr_area_contours_reversed[4], omr_area)
     part_3 = get_image_part(omr_area_contours_reversed[6], omr_area)
 
-    # cv2.imwrite("split/omr_part_1.jpg", part_1)
-    # cv2.imwrite("split/omr_part_2.jpg", part_2)
-    # cv2.imwrite("split/omr_part_3.jpg", part_3)
 
     part_1_images = split_image_times(part_1, 4, 1)
     part_2_images = split_image_times(part_2, 4, 1)
@@ -330,15 +282,10 @@ def read_omr(image_path):
                 int(0.05 * block.shape[1]) : int(0.95 * block.shape[1]),
                 int(0.01 * block.shape[0]) : -int(0.01 * block.shape[0]),
             ]
-            # cv2.imshow("", block)
-            # cv2.waitKey()
+
             columns = split_image_times(block, 1, 4)
             columns = columns[0]
-            # print(len(columns))
-            # for i in columns:
-            #     cv2.imshow("", i)
-            #     cv2.waitKey()
-            # print(columns)
+
 
             proper_images = []
             for i, img in enumerate(columns):
@@ -358,13 +305,7 @@ def read_omr(image_path):
             for lst in image_list:
                 highest_index = get_index_with_highest_white(lst)
                 answers[len(answers) + 1] = highest_index
-                # if len(answers) + 1 == 21:
-                #     print(np.sum(lst[0] == 255))
-                #     print(np.sum(lst[1] == 255))
-                #     print(np.sum(lst[2] == 255))
-                #     print(np.sum(lst[3] == 255))
-                #     cv2.imshow("", lst[0])
-                #     cv2.waitKey()
+
     cv2.destroyAllWindows()
     print(answers)
 
