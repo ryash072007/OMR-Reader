@@ -168,6 +168,39 @@ def get_areas_in_omr(omr_area, contours):
     return images
 
 
+def get_points(sharpened_image):
+    _, thresholded = cv2.threshold(sharpened_image, 127, 255, cv2.THRESH_BINARY)
+
+    # Find contours in the thresholded image
+    contours, _ = cv2.findContours(thresholded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    image_parts = list()
+    largest_area = 0
+    # Iterate over all contours
+    for i, contour in enumerate(contours):
+        # Get the image for the contour
+        x, y, w, h = cv2.boundingRect(np.array(contour))
+        if w * h > 8000:
+            image_parts.append((x, y, w, h))
+            if w * h > largest_area:
+                largest_area = w * h
+
+
+    circles_points = []
+
+    for x, y, w, h in image_parts:
+        image_part = sharpened_image[y : y + h, x : x + w]
+        image_area = w * h
+        circle_area = 3.14 * (min(w, h) / 2) ** 2
+        filled_pixels = np.sum(image_part == 0)
+        _range = range(int(0.95 * circle_area), int(1.05 * circle_area))
+        # print(circle_area, filled_pixels)
+        if filled_pixels in _range:
+            circles_points.append((x, y, w, h))
+    
+    return circles_points
+
+
 def read_omr(image_path):
     # Load the image
     image = cv2.imread(image_path)
@@ -266,12 +299,12 @@ def read_omr(image_path):
         omr_area, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE
     )
 
-    for i, contour in enumerate(omr_area_contours):
-    # Get the image for the contour 
-        part = get_image_part(contour, omr_area)
+    # for i, contour in enumerate(omr_area_contours):
+    # # Get the image for the contour 
+    #     part = get_image_part(contour, omr_area)
         
-        # Save the image
-        cv2.imwrite(f"split/omr_part_{i}.jpg", part)
+    #     # Save the image
+    #     cv2.imwrite(f"split/omr_part_{i}.jpg", part)
     
     # Get the contour image for the first contour and its children
     omr_area_contours_reversed = list(reversed(omr_area_contours))

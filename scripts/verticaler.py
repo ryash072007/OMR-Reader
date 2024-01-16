@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # Read image.
-img = cv2.imread("images/omr_sheet -filled and circles.png", cv2.IMREAD_COLOR)
+img = cv2.imread("images/test (3).jpg", cv2.IMREAD_COLOR)
 
 # Convert to grayscale.
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -57,7 +57,7 @@ if detected_circles is not None:
     # Define the four corners of the region of interest (ROI)
     roi_corners = np.array([(x, y) for (x, y) in ordered_circles], dtype=np.float32)
 
-    height, width = img.shape[0], img.shape[1]
+    height, width = 3300, 2475
     # height, width = img.shape[0], img.shape[1]
 
     # Define the destination points for the perspective transform
